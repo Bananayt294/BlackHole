@@ -1,0 +1,8 @@
+# Visual Studio cache and configuration files
+.vs/
+x64/
+Debug/
+Release/
+*.user
+*.suo
+*.db
