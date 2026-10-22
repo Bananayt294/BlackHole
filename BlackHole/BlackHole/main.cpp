@@ -1,14 +1,13 @@
-#pragma once
-#include <SDL3/SDL_main.h>
 #include "Application.h"
 
-int main(int argc, char* argv[]) {
+int main() {
     Application app;
-    if (app.initialize()) {
-        app.run();
-    }
-    else {
+    if (!app.initialize()) {
         app.shutdown();
+        return 1;
     }
+
+    app.run();
+    app.shutdown();
     return 0;
 }
