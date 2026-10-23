@@ -309,9 +309,7 @@ vec3 traceBlackHole(vec3 origin, vec3 initialDirection)
 
     return background + accumulatedDiskLight;
 }
-// --------------------------------------------------
-// Main
-// --------------------------------------------------
+
 
 void main()
 {
