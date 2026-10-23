@@ -1,0 +1,31 @@
+{
+    "Version": "1.2",
+    "Data": {
+        "Source": "c:\\vulkansdk\\1.4.363.0\\include\\vulkan\\vulkan_core.h",
+        "ProvidedModule": "",
+        "Includes": [
+            "c:\\vulkansdk\\1.4.363.0\\include\\vulkan\\vk_platform.h",
+            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.26100.0\\ucrt\\stddef.h",
+            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.26100.0\\ucrt\\corecrt.h",
+            "c:\\program files\\microsoft visual studio\\18\\insiders\\vc\\tools\\msvc\\14.52.37025\\include\\vcruntime.h",
+            "c:\\program files\\microsoft visual studio\\18\\insiders\\vc\\tools\\msvc\\14.52.37025\\include\\sal.h",
+            "c:\\program files\\microsoft visual studio\\18\\insiders\\vc\\tools\\msvc\\14.52.37025\\include\\concurrencysal.h",
+            "c:\\program files\\microsoft visual studio\\18\\insiders\\vc\\tools\\msvc\\14.52.37025\\include\\vadefs.h",
+            "c:\\program files\\microsoft visual studio\\18\\insiders\\vc\\tools\\msvc\\14.52.37025\\include\\stdint.h",
+            "c:\\vulkansdk\\1.4.363.0\\include\\vk_video\\vulkan_video_codec_h264std.h",
+            "c:\\vulkansdk\\1.4.363.0\\include\\vk_video\\vulkan_video_codecs_common.h",
+            "c:\\vulkansdk\\1.4.363.0\\include\\vk_video\\vulkan_video_codec_h264std_encode.h",
+            "c:\\vulkansdk\\1.4.363.0\\include\\vk_video\\vulkan_video_codec_h265std.h",
+            "c:\\vulkansdk\\1.4.363.0\\include\\vk_video\\vulkan_video_codec_h265std_encode.h",
+            "c:\\vulkansdk\\1.4.363.0\\include\\vk_video\\vulkan_video_codec_h264std_decode.h",
+            "c:\\vulkansdk\\1.4.363.0\\include\\vk_video\\vulkan_video_codec_h265std_decode.h",
+            "c:\\vulkansdk\\1.4.363.0\\include\\vk_video\\vulkan_video_codec_av1std.h",
+            "c:\\vulkansdk\\1.4.363.0\\include\\vk_video\\vulkan_video_codec_av1std_decode.h",
+            "c:\\vulkansdk\\1.4.363.0\\include\\vk_video\\vulkan_video_codec_av1std_encode.h",
+            "c:\\vulkansdk\\1.4.363.0\\include\\vk_video\\vulkan_video_codec_vp9std.h",
+            "c:\\vulkansdk\\1.4.363.0\\include\\vk_video\\vulkan_video_codec_vp9std_decode.h"
+        ],
+        "ImportedModules": [],
+        "ImportedHeaderUnits": []
+    }
+}

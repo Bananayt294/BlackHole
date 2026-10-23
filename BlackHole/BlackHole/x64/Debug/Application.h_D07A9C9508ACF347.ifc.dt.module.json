@@ -1,0 +1,22 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "x64\\Debug\\Application.obj",
+            "outputs": [
+                "x64\\Debug\\Application.h_D07A9C9508ACF347.ifc.dt.module.json",
+                "x64\\Debug\\Application.h_D07A9C9508ACF347.ifc.dt.d.json",
+                "x64\\Debug\\Application.h.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "C:\\BlackHole-C++\\BlackHole\\BlackHole\\Application.h",
+                    "source-path": "c:\\blackhole-c++\\blackhole\\blackhole\\application.h",
+                    "lookup-method": "absolute"
+                }
+            ],
+            "requires": []
+        }
+    ]
+}
