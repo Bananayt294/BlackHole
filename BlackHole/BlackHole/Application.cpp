@@ -757,7 +757,7 @@ VkPipeline Application::createGraphicsPipeline() {
 	VkPushConstantRange pushConstantRange{};
 	pushConstantRange.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 	pushConstantRange.offset = 0;
-	pushConstantRange.size = sizeof(float) * 2;
+	pushConstantRange.size = 12;
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
@@ -1067,17 +1067,27 @@ void Application::render() {
 		vkCmdSetScissor(res.commandBuffer, 0, 1, &scissor);
 
 		vkCmdBindPipeline(res.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-		float resolution[2] = {
-		static_cast<float>(swapchainWidth),
-		static_cast<float>(swapchainHeight)
+		struct PushConstants {
+			float resolution[2];
+			float time;
 		};
+
+		const Uint64 currentTime = SDL_GetPerformanceCounter();
+
+		const double elapsedTime =static_cast<double>(currentTime - startTime) /static_cast<double>(SDL_GetPerformanceFrequency());
+
+		PushConstants pc{};
+		pc.resolution[0] = static_cast<float>(swapchainWidth);
+		pc.resolution[1] = static_cast<float>(swapchainHeight);
+		pc.time = elapsedTime;
+
 		vkCmdPushConstants(
 			res.commandBuffer,
 			pipelineLayout, // Your VkPipelineLayout
 			VK_SHADER_STAGE_FRAGMENT_BIT,
 			0,
-			sizeof(resolution),
-			resolution
+			sizeof(PushConstants),
+			&pc
 		);
 		vkCmdDraw(res.commandBuffer, 3, 1, 0, 0);
 	}

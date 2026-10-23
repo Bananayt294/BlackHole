@@ -43,6 +43,7 @@ struct Application {
 	bool running{ false };
 	float width = 1280;
 	float height = 720;
+	const Uint64 startTime = SDL_GetPerformanceCounter();
 	//queue
 	VkQueue gfxQueue = nullptr;
 	uint32_t gfxQueueFamIdx = UINT32_MAX;
