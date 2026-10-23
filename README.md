@@ -32,6 +32,11 @@ The project is under active development. Current work focuses on improving gravi
 - Improve lighting, color, and animation
 - Optimize rendering performance
 
+##How to Use It
+- To use it go to the releases and download the latest release.
+- Extract The Zip file.
+- Run the BlackHole.exe
+- Make Sure all dependencies are installed with it when its being installed
 ## License
 
 MIT license
