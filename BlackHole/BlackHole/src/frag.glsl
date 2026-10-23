@@ -328,7 +328,7 @@ void main()
 
     vec3 up = normalize(cross(right, forward));
 
-    float fovScale = tan(radians(50.0) * 0.5);
+    float fovScale = tan(radians(70.0) * 0.5);
 
     vec3 rayDirection = normalize(
         forward

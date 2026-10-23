@@ -1,4 +1,14 @@
-﻿  BlackHole.vcxproj -> C:\BlackHole-C++\BlackHole\x64\Release\BlackHole.exe
+﻿  Application.cpp
+C:\BlackHole-C++\BlackHole\BlackHole\Application.cpp(1082,13): warning C4244: '=': conversion from 'const double' to 'float', possible loss of data
+  main.cpp
+  utils.cpp
+  VmaImplementation.cpp
+  VolkImplementation.cpp
+  Generating code
+  Previous IPDB not found, fall back to full compilation.
+  All 1622 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  Finished generating code
+  BlackHole.vcxproj -> C:\BlackHole-C++\BlackHole\x64\Release\BlackHole.exe
   C:\BlackHole-C++\BlackHole\BlackHole\src\frag.glsl
   C:\BlackHole-C++\BlackHole\BlackHole\src\vert.glsl
   2 File(s) copied
