@@ -11,9 +11,6 @@ const float BLACK_HOLE_RADIUS = 0.55;
 const float DISK_INNER_RADIUS = 0.75;
 const float DISK_OUTER_RADIUS = 2.0;
 
-// --------------------------------------------------
-// Procedural noise
-// --------------------------------------------------
 
 float hash(vec2 p)
 {
@@ -56,9 +53,6 @@ float fbm(vec2 p)
     return value;
 }
 
-// --------------------------------------------------
-// Background stars
-// --------------------------------------------------
 
 float starfield(vec2 uv)
 {
@@ -79,9 +73,6 @@ float starfield(vec2 uv)
     return starExists * brightness;
 }
 
-// --------------------------------------------------
-// Fog-free space background
-// --------------------------------------------------
 
 vec3 spaceBackground(vec3 direction)
 {
@@ -102,9 +93,6 @@ vec3 spaceBackground(vec3 direction)
     return background;
 }
 
-// --------------------------------------------------
-// Photon orbit integration
-// --------------------------------------------------
 
 vec2 orbitDerivative(vec2 state)
 {
@@ -128,9 +116,6 @@ vec2 integrateOrbitRK4(vec2 state, float h)
         (k1 + 2.0 * k2 + 2.0 * k3 + k4);
 }
 
-// --------------------------------------------------
-// Accretion disk shading
-// --------------------------------------------------
 
 vec3 shadeDisk(vec3 diskPosition)
 {
@@ -187,9 +172,6 @@ vec3 shadeDisk(vec3 diskPosition)
     return color;
 }
 
-// --------------------------------------------------
-// Black hole ray tracing
-// --------------------------------------------------
 
 vec3 traceBlackHole(vec3 origin, vec3 initialDirection)
 {
@@ -226,10 +208,7 @@ vec3 traceBlackHole(vec3 origin, vec3 initialDirection)
             break;
         }
 
-        // --------------------------------------------------
-        // Approximate 3D gravitational ray bending
-        // --------------------------------------------------
-
+        
         vec3 radial = position / radius;
 
         // Only bend the ray toward the black hole in the
@@ -275,10 +254,7 @@ vec3 traceBlackHole(vec3 origin, vec3 initialDirection)
         vec3 newPosition =
             position + midpointDirection * stepSize;
 
-        // --------------------------------------------------
-        // Accretion disk intersection
-        // --------------------------------------------------
-
+        
         bool crossedDiskPlane =
             (previousPosition.y > 0.0 &&
              newPosition.y <= 0.0) ||
@@ -354,7 +330,7 @@ void main()
 
     vec3 up = normalize(cross(right, forward));
 
-    float fovScale = tan(radians(35.0) * 0.5);
+    float fovScale = tan(radians(50.0) * 0.5);
 
     vec3 rayDirection = normalize(
         forward
