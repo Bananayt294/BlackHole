@@ -1,3 +1,4 @@
+
 #version 450
 
 layout(location = 0) out vec4 outColor;
@@ -7,10 +8,10 @@ layout(push_constant) uniform PushConstants {
     float time;
 } pc;
 
+const float DISK_BRIGHTNESS = 2.5;
 const float BLACK_HOLE_RADIUS = 0.55;
 const float DISK_INNER_RADIUS = 0.75;
 const float DISK_OUTER_RADIUS = 2.0;
-
 
 float hash(vec2 p)
 {
@@ -38,22 +39,6 @@ float noise(vec2 p)
     );
 }
 
-float fbm(vec2 p)
-{
-    float value = 0.0;
-    float amplitude = 0.5;
-
-    for (int i = 0; i < 4; ++i)
-    {
-        value += amplitude * noise(p);
-        p = p * 2.03 + vec2(13.7, 7.1);
-        amplitude *= 0.5;
-    }
-
-    return value;
-}
-
-
 float starfield(vec2 uv)
 {
     vec2 grid = uv * 100.0;
@@ -68,11 +53,11 @@ float starfield(vec2 uv)
     float starExists = step(0.985, hash(cell + 42.7));
 
     vec2 delta = local - starPosition;
+
     float brightness = exp(-dot(delta, delta) * 1800.0);
 
     return starExists * brightness;
 }
-
 
 vec3 spaceBackground(vec3 direction)
 {
@@ -85,14 +70,294 @@ vec3 spaceBackground(vec3 direction)
         asin(clamp(direction.y, -1.0, 1.0)) / PI + 0.5
     );
 
-    vec3 background = vec3(0.0008, 0.0012, 0.0035);
+    vec3 background = vec3(0.0);
 
     float stars = starfield(skyUV);
-    background += vec3(0.72, 0.80, 1.0) * stars;
+    background += vec3(0.45, 0.52, 0.70) * stars * 0.65;
 
     return background;
 }
 
+vec3 toDiskSpace(vec3 p)
+{
+    float tilt = radians(15.0);
+
+    float c = cos(tilt);
+    float s = sin(tilt);
+
+    return vec3(
+        p.x,
+        c * p.y + s * p.z,
+       -s * p.y + c * p.z
+    );
+}
+
+float sampleDiskDensity(vec3 p)
+{
+    p = toDiskSpace(p);
+
+    float radius = length(p.xz);
+
+    if (radius <= DISK_INNER_RADIUS ||
+        radius >= DISK_OUTER_RADIUS)
+    {
+        return 0.0;
+    }
+
+    float thickness = mix(
+        0.04,
+        0.085,
+        smoothstep(
+            DISK_INNER_RADIUS,
+            DISK_OUTER_RADIUS,
+            radius
+        )
+    );
+
+    float normalizedHeight = abs(p.y) / thickness;
+
+    if (normalizedHeight >= 1.0)
+        return 0.0;
+
+    float verticalDensity = exp(
+        -2.5 * normalizedHeight * normalizedHeight
+    );
+
+    float innerFade = smoothstep(
+        DISK_INNER_RADIUS,
+        DISK_INNER_RADIUS + 0.12,
+        radius
+    );
+
+    float outerFade = 1.0 - smoothstep(
+        DISK_OUTER_RADIUS - 0.18,
+        DISK_OUTER_RADIUS,
+        radius
+    );
+
+    float rotation =
+        pc.time * (0.12 + 0.4 / max(radius, 0.2));
+
+    float c = cos(rotation);
+    float s = sin(rotation);
+
+    vec2 q = mat2(c, -s, s, c) * p.xz;
+
+    float broadNoise = noise(
+        q * 8.0 + vec2(1.7, 4.2)
+    );
+
+    float fineNoise = noise(
+        q * 23.0 + vec2(17.0, 5.0)
+    );
+
+    float turbulence =
+        broadNoise * 0.65 +
+        fineNoise * 0.35;
+
+    float plasmaDensity = mix(
+        0.18,
+        1.25,
+        smoothstep(0.24, 0.76, turbulence)
+    );
+
+    return verticalDensity *
+           innerFade *
+           outerFade *
+           plasmaDensity;
+}
+
+float samplePlasmaHaze(vec3 p)
+{
+    float radius = length(p.xz);
+
+    const float HAZE_INNER_RADIUS = 0.64;
+    const float HAZE_OUTER_RADIUS = 2.75;
+
+    if (radius <= HAZE_INNER_RADIUS ||
+        radius >= HAZE_OUTER_RADIUS)
+    {
+        return 0.0;
+    }
+
+    float innerFade = smoothstep(
+        HAZE_INNER_RADIUS,
+        DISK_INNER_RADIUS + 0.18,
+        radius
+    );
+
+    float outerFade = 1.0 - smoothstep(
+        DISK_OUTER_RADIUS + 0.10,
+        HAZE_OUTER_RADIUS,
+        radius
+    );
+
+    float thickness = mix(
+        0.12,
+        0.40,
+        smoothstep(
+            DISK_INNER_RADIUS,
+            HAZE_OUTER_RADIUS,
+            radius
+        )
+    );
+
+    float heightRatio = abs(p.y) / thickness;
+
+    float verticalFalloff = exp(
+        -1.8 * heightRatio * heightRatio
+    );
+
+    vec2 q = p.xz * 2.8;
+
+    q += vec2(
+        pc.time * 0.035,
+        -pc.time * 0.022
+    );
+
+    float broadNoise = noise(q);
+
+    float fineNoise = noise(
+        q * 2.7 +
+        vec2(p.y * 3.0, -p.y * 2.0) +
+        vec2(-pc.time * 0.05, pc.time * 0.03)
+    );
+
+    float clouds =
+        broadNoise * 0.65 +
+        fineNoise * 0.35;
+
+    float wisps = smoothstep(
+        0.30,
+        0.72,
+        clouds
+    );
+
+    float density = mix(
+        0.10,
+        0.85,
+        wisps
+    );
+
+    return innerFade *
+           outerFade *
+           verticalFalloff *
+           density;
+}
+
+vec3 shadeDisk(vec3 diskPosition, vec3 cameraPosition)
+{
+    diskPosition = toDiskSpace(diskPosition);
+
+    float radius = length(diskPosition.xz);
+    float angle = atan(diskPosition.z, diskPosition.x);
+
+    float heat = 1.0 - smoothstep(
+        DISK_INNER_RADIUS,
+        DISK_OUTER_RADIUS,
+        radius
+    );
+
+    vec3 outerAmber = vec3(0.24, 0.095, 0.027);
+    vec3 deepGold   = vec3(0.52, 0.27, 0.085);
+    vec3 warmGold   = vec3(0.88, 0.54, 0.25);
+    vec3 paleGold   = vec3(1.00, 0.77, 0.49);
+    vec3 creamWhite = vec3(1.00, 0.91, 0.76);
+    vec3 hotWhite   = vec3(1.00, 0.985, 0.94);
+
+    vec3 color = mix(
+        outerAmber,
+        deepGold,
+        smoothstep(0.0, 0.35, heat)
+    );
+
+    color = mix(
+        color,
+        warmGold,
+        smoothstep(0.18, 0.52, heat)
+    );
+
+    color = mix(
+        color,
+        paleGold,
+        smoothstep(0.38, 0.70, heat)
+    );
+
+    color = mix(
+        color,
+        creamWhite,
+        smoothstep(0.58, 0.86, heat)
+    );
+
+    color = mix(
+        color,
+        hotWhite,
+        pow(heat, 6.0)
+    );
+
+    float angularSpeed =
+        1.2 / pow(max(radius, 0.1), 1.5);
+
+    float swirl =
+        angle * 7.0
+        - radius * 13.0
+        - pc.time * angularSpeed;
+
+    float broad = noise(
+        vec2(swirl * 1.1, radius * 8.0)
+    );
+
+    float fine = noise(
+        vec2(swirl * 2.8, radius * 24.0)
+    );
+
+    float streaks = 0.5 + 0.5 * sin(
+        swirl + (broad - 0.5) * 4.0
+    );
+
+    float detail =
+        broad * 0.40 +
+        fine * 0.25 +
+        streaks * 0.35;
+
+    float filaments = smoothstep(
+        0.32,
+        0.72,
+        detail
+    );
+
+    color *= mix(0.42, 1.45, filaments);
+
+    vec3 diskTangent = normalize(
+        vec3(-diskPosition.z, 0.0, diskPosition.x)
+    );
+
+    vec3 toCamera = normalize(
+        cameraPosition - diskPosition
+    );
+
+    float directional = dot(diskTangent, toCamera);
+
+    color *= 1.0 + 0.06 * directional;
+
+    float innerMask = smoothstep(
+        DISK_INNER_RADIUS,
+        DISK_INNER_RADIUS + 0.08,
+        radius
+    );
+
+    float outerMask = 1.0 - smoothstep(
+        DISK_OUTER_RADIUS - 0.12,
+        DISK_OUTER_RADIUS,
+        radius
+    );
+
+    color *= innerMask * outerMask;
+
+    color *= 0.90 + 0.75 * pow(heat, 2.0);
+
+    return color;
+}
 
 vec2 orbitDerivative(vec2 state)
 {
@@ -116,200 +381,175 @@ vec2 integrateOrbitRK4(vec2 state, float h)
         (k1 + 2.0 * k2 + 2.0 * k3 + k4);
 }
 
-
-vec3 shadeDisk(vec3 diskPosition)
-{
-    float radius = length(diskPosition.xz);
-    float angle = atan(diskPosition.z, diskPosition.x);
-
-    float heat = 1.0 - smoothstep(
-        DISK_INNER_RADIUS,
-        DISK_OUTER_RADIUS,
-        radius
-    );
-
-    vec3 darkEmber = vec3(0.12, 0.008, 0.003);
-    vec3 deepOrange = vec3(0.48, 0.035, 0.006);
-    vec3 orange = vec3(1.00, 0.16, 0.025);
-    vec3 gold = vec3(1.00, 0.48, 0.16);
-    vec3 hotWhite = vec3(1.00, 0.82, 0.62);
-
-    vec3 color = mix(darkEmber, deepOrange, pow(heat, 0.35));
-    color = mix(color, orange, pow(heat, 1.2));
-    color = mix(color, gold, pow(heat, 3.0));
-    color = mix(color, hotWhite, pow(heat, 9.0));
-
-    float angularSpeed = 1.2 / max(radius, 0.1);
-
-    float swirl =
-        angle * 5.0
-        - pc.time * angularSpeed
-        - radius * 9.0;
-
-    float broad = noise(vec2(swirl * 1.2, radius * 7.0));
-    float fineNoise = noise(vec2(swirl * 3.5, radius * 23.0));
-
-    float turbulence = broad * 0.7 + fineNoise * 0.3;
-    float filaments = smoothstep(0.28, 0.78, turbulence);
-
-    color *= 0.48 + filaments * 1.15;
-
-    float outerMask = 1.0 - smoothstep(
-        DISK_OUTER_RADIUS - 0.10,
-        DISK_OUTER_RADIUS,
-        radius
-    );
-
-    float innerMask = smoothstep(
-        DISK_INNER_RADIUS,
-        DISK_INNER_RADIUS + 0.10,
-        radius
-    );
-
-    color *= outerMask * innerMask;
-    color *= 0.75 + 0.65 * pow(heat, 2.0);
-
-    return color;
-}
-
-
 vec3 traceBlackHole(vec3 origin, vec3 initialDirection)
 {
-    const float horizonRadius = BLACK_HOLE_RADIUS;
-    const float diskInnerRadius = DISK_INNER_RADIUS;
-    const float diskOuterRadius = DISK_OUTER_RADIUS;
+    const float inverseHorizon = 1.0 / BLACK_HOLE_RADIUS;
 
-    const float stepSize = 0.025;
-    const int maxSteps = 600;
+    const float angularStep = 0.015;
+    const int maxSteps = 500;
 
-    vec3 position = origin;
+    float initialRadius = length(origin);
+
     vec3 direction = normalize(initialDirection);
+    vec3 radialBasis = normalize(origin);
+
+    float radialVelocity = dot(direction, radialBasis);
+
+    vec3 tangent =
+        direction - radialVelocity * radialBasis;
+
+    float tangentMagnitude = length(tangent);
+
+    if (tangentMagnitude < 0.00001)
+    {
+        if (radialVelocity < 0.0)
+            return vec3(0.0);
+
+        return spaceBackground(direction);
+    }
+
+    vec3 tangentBasis = tangent / tangentMagnitude;
+
+    float u = 1.0 / initialRadius;
+    float v = -u * radialVelocity / tangentMagnitude;
+
+    vec2 state = vec2(u, v);
+
+    float phi = 0.0;
+
+    vec3 previousPosition = origin;
 
     vec3 accumulatedDiskLight = vec3(0.0);
-    vec3 previousPosition = position;
+    float accumulatedDiskOpacity = 0.0;
+
+    vec3 accumulatedHazeLight = vec3(0.0);
+    float accumulatedHazeOpacity = 0.0;
 
     bool swallowed = false;
 
     for (int i = 0; i < maxSteps; ++i)
     {
-        float radius = length(position);
+        state = integrateOrbitRK4(state, angularStep);
 
-        // The ray has crossed the event horizon.
-        if (radius <= horizonRadius)
+        phi += angularStep;
+
+        u = state.x;
+        v = state.y;
+
+        if (u >= inverseHorizon)
         {
             swallowed = true;
             break;
         }
 
-        // The ray has escaped the strong gravitational field.
-        if (radius > 12.0 &&
-            dot(position, direction) > 0.0)
-        {
+        if (u <= 0.0)
             break;
-        }
 
-        
-        vec3 radial = position / radius;
+        float radius = 1.0 / u;
 
-        // Only bend the ray toward the black hole in the
-        // direction perpendicular to its current travel.
-        vec3 perpendicular = radial -
-            direction * dot(radial, direction);
+        vec3 currentRadial =
+            radialBasis * cos(phi) +
+            tangentBasis * sin(phi);
 
-        vec3 bend = -1.5 * horizonRadius *
-            perpendicular / (radius * radius);
+        vec3 currentPosition = radius * currentRadial;
 
-        // Midpoint estimate improves stability over a
-        // simple Euler integration step.
-        vec3 midpointDirection = normalize(
-            direction + bend * (0.5 * stepSize)
-        );
+        vec3 samplePosition =
+            0.5 * (previousPosition + currentPosition);
 
-        vec3 midpointPosition =
-            position + midpointDirection * (0.5 * stepSize);
+        float segmentLength =
+            length(currentPosition - previousPosition);
 
-        float midpointRadius = max(
-            length(midpointPosition),
-            horizonRadius
-        );
+        float hazeDensity = samplePlasmaHaze(samplePosition);
 
-        vec3 midpointRadial =
-            midpointPosition / midpointRadius;
-
-        vec3 midpointPerpendicular =
-            midpointRadial -
-            midpointDirection *
-            dot(midpointRadial, midpointDirection);
-
-        vec3 midpointBend =
-            -1.5 * horizonRadius *
-            midpointPerpendicular /
-            (midpointRadius * midpointRadius);
-
-        // Advance the ray.
-        vec3 newDirection = normalize(
-            direction + midpointBend * stepSize
-        );
-
-        vec3 newPosition =
-            position + midpointDirection * stepSize;
-
-        
-        bool crossedDiskPlane =
-            (previousPosition.y > 0.0 &&
-             newPosition.y <= 0.0) ||
-            (previousPosition.y < 0.0 &&
-             newPosition.y >= 0.0);
-
-        if (crossedDiskPlane)
+        if (hazeDensity > 0.001)
         {
-            float denominator =
-                previousPosition.y - newPosition.y;
+            vec3 hazeColor = vec3(0.52, 0.39, 0.23);
 
-            if (abs(denominator) > 0.000001)
-            {
-                float t =
-                    previousPosition.y / denominator;
+            float hazeSampleOpacity = 1.0 - exp(
+                -hazeDensity * segmentLength * 0.28
+            );
 
-                vec3 hitPosition = mix(
-                    previousPosition,
-                    newPosition,
-                    t
-                );
+            float remainingHaze =
+                1.0 - accumulatedHazeOpacity;
 
-                float hitRadius = length(hitPosition.xz);
+            accumulatedHazeLight +=
+                remainingHaze *
+                hazeColor *
+                hazeSampleOpacity *
+                0.65;
 
-                if (hitRadius >= diskInnerRadius &&
-                    hitRadius <= diskOuterRadius)
-                {
-                    // Accumulate emitted light from the disk.
-                    vec3 diskEmission = shadeDisk(hitPosition);
-
-                    accumulatedDiskLight +=
-                        diskEmission * 0.65;
-                }
-            }
+            accumulatedHazeOpacity +=
+                remainingHaze * hazeSampleOpacity;
         }
 
-        previousPosition = newPosition;
-        position = newPosition;
-        direction = newDirection;
+        float density = sampleDiskDensity(samplePosition);
+
+        if (density > 0.001)
+        {
+            vec3 emission = shadeDisk(samplePosition, origin);
+
+            float sampleOpacity = 1.0 - exp(
+                -density * segmentLength * 4.0
+            );
+
+            float remainingOpacity =
+                1.0 - accumulatedDiskOpacity;
+
+            accumulatedDiskLight +=
+                remainingOpacity *
+                emission *
+                sampleOpacity *
+                2.0;
+
+            accumulatedDiskOpacity +=
+                remainingOpacity * sampleOpacity;
+        }
+
+        previousPosition = currentPosition;
+
+        if (radius > 12.0 && v < 0.0)
+            break;
     }
 
-    // A captured ray cannot see the background beyond
-    // the event horizon, but it retains any disk light
-    // encountered before being captured.
     if (swallowed)
     {
-        return accumulatedDiskLight;
+        return accumulatedDiskLight * DISK_BRIGHTNESS
+             + accumulatedHazeLight;
     }
 
-    // Escaping rays reveal the background after bending.
-    vec3 background = spaceBackground(direction);
+    vec3 finalRadial =
+        radialBasis * cos(phi) +
+        tangentBasis * sin(phi);
 
-    return background + accumulatedDiskLight;
+    vec3 finalTangent =
+        -radialBasis * sin(phi) +
+        tangentBasis * cos(phi);
+
+    vec3 finalDirection;
+
+    if (u <= 0.0)
+    {
+        finalDirection = normalize(finalRadial);
+    }
+    else
+    {
+        float dr_dphi = -v / (u * u);
+
+        finalDirection = normalize(
+            dr_dphi * finalRadial +
+            (1.0 / u) * finalTangent
+        );
+    }
+
+    vec3 background = spaceBackground(finalDirection);
+
+    vec3 attenuatedBackground =
+        background * (1.0 - accumulatedHazeOpacity);
+
+    return attenuatedBackground
+         + accumulatedDiskLight * DISK_BRIGHTNESS
+         + accumulatedHazeLight;
 }
-
 
 void main()
 {
@@ -317,7 +557,7 @@ void main()
         (gl_FragCoord.xy - 0.5 * pc.resolution)
         / pc.resolution.y;
 
-    vec3 cameraPosition = vec3(0.0, 1.8, 6.0);
+    vec3 cameraPosition = vec3(0.0, 0.7, 3.7);
     vec3 target = vec3(0.0, 0.0, 0.0);
 
     vec3 forward = normalize(target - cameraPosition);
@@ -341,9 +581,42 @@ void main()
         rayDirection
     );
 
-    // Tone mapping to keep bright disk colors controlled.
+    float cameraRadius = length(cameraPosition);
+
+    vec3 cameraRadial = normalize(cameraPosition);
+
+    float radialComponent = dot(
+        rayDirection,
+        cameraRadial
+    );
+
+    float transverseLength = length(
+        rayDirection - cameraRadial * radialComponent
+    );
+
+    float impactParameter =
+        cameraRadius * transverseLength /
+        sqrt(max(
+            0.0001,
+            1.0 - BLACK_HOLE_RADIUS / cameraRadius
+        ));
+
+    float criticalImpactParameter =
+        1.5 * sqrt(3.0) * BLACK_HOLE_RADIUS;
+
+    float ringDistance = abs(
+        impactParameter - criticalImpactParameter
+    );
+
+    float photonRing = exp(
+        -pow(ringDistance / 0.025, 2.0)
+    );
+
+    color += vec3(1.0, 0.78, 0.52) * photonRing * 0.65;
+
     color = max(color, vec3(0.0));
     color = color / (color + vec3(0.65));
+
     color = pow(color, vec3(1.0 / 2.2));
 
     outColor = vec4(color, 1.0);
