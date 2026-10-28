@@ -3,12 +3,19 @@ c:\blackhole-c++\blackhole\blackhole\x64\release\vc145.pdb
 \\?\c:\blackhole-c++\blackhole\blackhole\x64\release\vmaimplementation.obj
 \\?\c:\blackhole-c++\blackhole\blackhole\x64\release\utils.obj
 \\?\c:\blackhole-c++\blackhole\blackhole\x64\release\main.obj
+\\?\c:\blackhole-c++\blackhole\blackhole\x64\release\camera.obj
 \\?\c:\blackhole-c++\blackhole\blackhole\x64\release\application.obj
+c:\blackhole-c++\blackhole\blackhole\x64\release\camera.h.ifc
+c:\blackhole-c++\blackhole\blackhole\x64\release\camera.h.ifc.d.json
+\\?\c:\blackhole-c++\blackhole\blackhole\x64\release\camera.h.obj
 c:\blackhole-c++\blackhole\x64\release\blackhole.exe
 c:\blackhole-c++\blackhole\x64\release\blackhole.pdb
+c:\blackhole-c++\blackhole\blackhole\x64\release\camera.h.module.json
 c:\blackhole-c++\blackhole\blackhole\x64\release\blackhole.ipdb
 c:\blackhole-c++\blackhole\blackhole\x64\release\blackhole.iobj
 c:\blackhole-c++\blackhole\blackhole\x64\release\application.obj
+c:\blackhole-c++\blackhole\blackhole\x64\release\camera.h.obj
+c:\blackhole-c++\blackhole\blackhole\x64\release\camera.obj
 c:\blackhole-c++\blackhole\blackhole\x64\release\main.obj
 c:\blackhole-c++\blackhole\blackhole\x64\release\utils.obj
 c:\blackhole-c++\blackhole\blackhole\x64\release\vmaimplementation.obj
@@ -21,3 +28,6 @@ c:\blackhole-c++\blackhole\blackhole\x64\release\blackhole.tlog\link.command.1.t
 c:\blackhole-c++\blackhole\blackhole\x64\release\blackhole.tlog\link.read.1.tlog
 c:\blackhole-c++\blackhole\blackhole\x64\release\blackhole.tlog\link.secondary.1.tlog
 c:\blackhole-c++\blackhole\blackhole\x64\release\blackhole.tlog\link.write.1.tlog
+c:\blackhole-c++\blackhole\blackhole\x64\release\blackhole_md.tlog\cl.command.1.tlog
+c:\blackhole-c++\blackhole\blackhole\x64\release\blackhole_md.tlog\microsoft.build.cpptasks.cl.read.1.tlog
+c:\blackhole-c++\blackhole\blackhole\x64\release\blackhole_md.tlog\microsoft.build.cpptasks.cl.write.1.tlog

@@ -1,0 +1,22 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "x64\\Release\\Camera.obj",
+            "outputs": [
+                "x64\\Release\\Camera.h_C3AE6A6E48EA9FBC.ifc.dt.module.json",
+                "x64\\Release\\Camera.h_C3AE6A6E48EA9FBC.ifc.dt.d.json",
+                "x64\\Release\\Camera.h.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "C:\\BlackHole-C++\\BlackHole\\BlackHole\\Camera.h",
+                    "source-path": "c:\\blackhole-c++\\blackhole\\blackhole\\camera.h",
+                    "lookup-method": "absolute"
+                }
+            ],
+            "requires": []
+        }
+    ]
+}

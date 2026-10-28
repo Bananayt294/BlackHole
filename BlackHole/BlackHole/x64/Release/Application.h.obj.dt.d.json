@@ -346,7 +346,8 @@
             "c:\\program files\\microsoft visual studio\\18\\insiders\\vc\\tools\\msvc\\14.52.37025\\include\\__msvc_filebuf.hpp",
             "c:\\program files\\microsoft visual studio\\18\\insiders\\vc\\tools\\msvc\\14.52.37025\\include\\sstream",
             "c:\\blackhole-c++\\blackhole\\blackhole\\utils.h",
-            "c:\\program files\\microsoft visual studio\\18\\insiders\\vc\\tools\\msvc\\14.52.37025\\include\\array"
+            "c:\\program files\\microsoft visual studio\\18\\insiders\\vc\\tools\\msvc\\14.52.37025\\include\\array",
+            "c:\\blackhole-c++\\blackhole\\blackhole\\camera.h"
         ],
         "ImportedModules": [],
         "ImportedHeaderUnits": []

@@ -1,0 +1,22 @@
+{
+    "version": 1,
+    "revision": 0,
+    "rules": [
+        {
+            "primary-output": "x64\\Release\\Camera.h.obj",
+            "outputs": [
+                "C:\\BlackHole-C++\\BlackHole\\BlackHole\\x64\\Release\\vc145.pdb",
+                "x64\\Release\\",
+                "C:\\BlackHole-C++\\BlackHole\\BlackHole\\x64\\Release\\Camera.h.ifc"
+            ],
+            "provides": [
+                {
+                    "logical-name": "Camera.h",
+                    "source-path": "c:\\blackhole-c++\\blackhole\\blackhole\\camera.h",
+                    "lookup-method": "absolute"
+                }
+            ],
+            "requires": []
+        }
+    ]
+}

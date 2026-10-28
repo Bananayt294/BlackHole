@@ -10,6 +10,7 @@
 #include <sstream>
 #include "utils.h"
 #include <array>
+#include "Camera.h"
 struct SDL_Window;
 struct VmaAllocator_T;
 typedef struct VmaAllocator_T* VmaAllocator;
@@ -28,6 +29,9 @@ struct FrameResources
 
 //default configs
 struct Application {
+
+	Camera camera;
+	bool mouseCaptured = true;
 
 	static VKAPI_ATTR VkBool32 VKAPI_CALL debugCallback(
 		VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,

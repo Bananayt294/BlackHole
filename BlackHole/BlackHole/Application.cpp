@@ -14,26 +14,72 @@ bool Application::createSurface() {
 }
 
 
-void Application::run() {
+void Application::run()
+{
 	running = true;
-	while (running) {
+
+	Uint64 previousCounter = SDL_GetPerformanceCounter();
+
+	while (running)
+	{
+		Uint64 currentCounter = SDL_GetPerformanceCounter();
+
+		float deltaTime = static_cast<float>(
+			static_cast<double>(currentCounter - previousCounter) /
+			static_cast<double>(SDL_GetPerformanceFrequency())
+			);
+
+		previousCounter = currentCounter;
+
 		SDL_Event event{ 0 };
-		while (SDL_PollEvent(&event)) {
-			if (event.type == SDL_EVENT_QUIT) {
+
+		while (SDL_PollEvent(&event))
+		{
+			if (event.type == SDL_EVENT_QUIT)
+			{
 				running = false;
 				break;
 			}
-			else if (event.type == SDL_EVENT_WINDOW_RESIZED) {
+			else if (event.type == SDL_EVENT_MOUSE_MOTION &&
+				mouseCaptured)
+			{
+				camera.processMouse(
+					event.motion.xrel,
+					event.motion.yrel
+				);
+			}
+			else if (event.type == SDL_EVENT_KEY_DOWN &&
+				event.key.key == SDLK_ESCAPE &&
+				!event.key.repeat)
+			{
+				mouseCaptured = !mouseCaptured;
+
+				if (!SDL_SetWindowRelativeMouseMode(
+					window,
+					mouseCaptured))
+				{
+					SDL_Log(
+						"Failed to change mouse mode: %s",
+						SDL_GetError()
+					);
+				}
+			}
+			else if (event.type == SDL_EVENT_WINDOW_RESIZED)
+			{
 				int pixelWidth = 0;
 				int pixelHeight = 0;
+
 				if (SDL_GetWindowSizeInPixels(window, &pixelWidth, &pixelHeight)) {
 					width = static_cast<float>(pixelWidth);
 					height = static_cast<float>(pixelHeight);
+
 					requireSwapchainRecreate = true;
 				}
 			}
 		}
-		if (running) {
+		if (running)
+		{
+			camera.update(SDL_GetKeyboardState(nullptr), deltaTime);
 			render();
 		}
 	}
@@ -55,6 +101,11 @@ bool Application::initialize() {
 	if (!window) {
 		std::cerr << "Error creating window: " << SDL_GetError() << std::endl;
 		return false;
+	}
+
+	if (!SDL_SetWindowRelativeMouseMode(window, true))
+	{
+		SDL_Log("Mouse capture failed: %s", SDL_GetError());
 	}
 
 	return initializeVulkan();
@@ -757,7 +808,7 @@ VkPipeline Application::createGraphicsPipeline() {
 	VkPushConstantRange pushConstantRange{};
 	pushConstantRange.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 	pushConstantRange.offset = 0;
-	pushConstantRange.size = 12;
+	pushConstantRange.size = 48;
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
@@ -1067,19 +1118,34 @@ void Application::render() {
 		vkCmdSetScissor(res.commandBuffer, 0, 1, &scissor);
 
 		vkCmdBindPipeline(res.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-		struct PushConstants {
-			float resolution[2];
-			float time;
+		struct PushConstants
+		{
+			float resolution[2]{};
+			float time{};
+			float padding{};
+			float cameraPositionYaw[4]{};
+			float cameraPitchFov[4]{};
 		};
+
+		static_assert(sizeof(PushConstants) == 48);
 
 		const Uint64 currentTime = SDL_GetPerformanceCounter();
 
 		const double elapsedTime =static_cast<double>(currentTime - startTime) /static_cast<double>(SDL_GetPerformanceFrequency());
 
 		PushConstants pc{};
+
 		pc.resolution[0] = static_cast<float>(swapchainWidth);
 		pc.resolution[1] = static_cast<float>(swapchainHeight);
 		pc.time = elapsedTime;
+
+		pc.cameraPositionYaw[0] = camera.x;
+		pc.cameraPositionYaw[1] = camera.y;
+		pc.cameraPositionYaw[2] = camera.z;
+		pc.cameraPositionYaw[3] = camera.yaw;
+
+		pc.cameraPitchFov[0] = camera.pitch;
+		pc.cameraPitchFov[1] = camera.fovDegrees;
 
 		vkCmdPushConstants(
 			res.commandBuffer,

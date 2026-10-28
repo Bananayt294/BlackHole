@@ -6,12 +6,16 @@ layout(location = 0) out vec4 outColor;
 layout(push_constant) uniform PushConstants {
     vec2 resolution;
     float time;
+    float padding;
+    vec4 cameraPositionYaw;
+    vec4 cameraPitchFov;
 } pc;
+const float MODEL_SCALE = 1.25;
 
 const float DISK_BRIGHTNESS = 2.5;
-const float BLACK_HOLE_RADIUS = 0.55;
-const float DISK_INNER_RADIUS = 0.75;
-const float DISK_OUTER_RADIUS = 2.0;
+const float BLACK_HOLE_RADIUS = 0.55 * MODEL_SCALE;
+const float DISK_INNER_RADIUS = 0.75 * MODEL_SCALE;
+const float DISK_OUTER_RADIUS = 2.0 * MODEL_SCALE;
 
 float hash(vec2 p)
 {
@@ -169,6 +173,7 @@ float sampleDiskDensity(vec3 p)
 
 float samplePlasmaHaze(vec3 p)
 {
+    p = toDiskSpace(p);
     float radius = length(p.xz);
 
     const float HAZE_INNER_RADIUS = 0.64;
@@ -554,26 +559,38 @@ vec3 traceBlackHole(vec3 origin, vec3 initialDirection)
 void main()
 {
     vec2 uv =
-        (gl_FragCoord.xy - 0.5 * pc.resolution)
-        / pc.resolution.y;
+    (gl_FragCoord.xy - 0.5 * pc.resolution)
+    / pc.resolution.y;
 
-    vec3 cameraPosition = vec3(0.0, 0.7, 3.7);
-    vec3 target = vec3(0.0, 0.0, 0.0);
+    vec3 cameraPosition = pc.cameraPositionYaw.xyz;
 
-    vec3 forward = normalize(target - cameraPosition);
+    float yaw = pc.cameraPositionYaw.w;
+    float pitch = pc.cameraPitchFov.x;
+
+    vec3 forward = normalize(vec3(
+        cos(pitch) * sin(yaw),
+        sin(pitch),
+        -cos(pitch) * cos(yaw)
+    ));
+
+    vec3 worldUp = vec3(0.0, 1.0, 0.0);
 
     vec3 right = normalize(
-        cross(forward, vec3(0.0, 1.0, 0.0))
+        cross(forward, worldUp)
     );
 
-    vec3 up = normalize(cross(right, forward));
+    vec3 up = normalize(
+        cross(right, forward)
+    );
 
-    float fovScale = tan(radians(70.0) * 0.5);
+    float fovScale = tan(
+        radians(pc.cameraPitchFov.y) * 0.5
+    );
 
     vec3 rayDirection = normalize(
         forward
         + right * uv.x * fovScale
-        - up * uv.y * fovScale
+        + up * uv.y * fovScale
     );
 
     vec3 color = traceBlackHole(
