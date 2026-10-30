@@ -348,7 +348,13 @@
             "c:\\program files\\microsoft visual studio\\18\\insiders\\vc\\tools\\msvc\\14.52.37025\\include\\sstream",
             "c:\\blackhole-c++\\blackhole\\blackhole\\utils.h",
             "c:\\program files\\microsoft visual studio\\18\\insiders\\vc\\tools\\msvc\\14.52.37025\\include\\array",
-            "c:\\blackhole-c++\\blackhole\\blackhole\\camera.h"
+            "c:\\blackhole-c++\\blackhole\\blackhole\\camera.h",
+            "c:\\blackhole-c++\\vendor\\imgui\\imgui.h",
+            "c:\\blackhole-c++\\vendor\\imgui\\imconfig.h",
+            "c:\\program files (x86)\\windows kits\\10\\include\\10.0.26100.0\\ucrt\\assert.h",
+            "c:\\blackhole-c++\\vendor\\imgui\\backends\\imgui_impl_sdl3.h",
+            "c:\\blackhole-c++\\vendor\\imgui\\backends\\imgui_impl_vulkan.h",
+            "c:\\vulkansdk\\1.4.363.0\\include\\volk\\volk.h"
         ],
         "ImportedModules": [],
         "ImportedHeaderUnits": []

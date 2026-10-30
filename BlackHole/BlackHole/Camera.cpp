@@ -19,8 +19,8 @@ void Camera::update(const bool* keys, float deltaTime) {
 	if (keys[SDL_SCANCODE_D]) rightInput += 1.0f;
 	if (keys[SDL_SCANCODE_A]) rightInput -= 1.0f;
 
-	if (keys[SDL_SCANCODE_SPACE]) verticalInput += 1.0f;
-	if (keys[SDL_SCANCODE_LCTRL]) verticalInput -= 1.0f;
+	if (keys[SDL_SCANCODE_SPACE]) verticalInput -=  1.0f;
+	if (keys[SDL_SCANCODE_LCTRL]) verticalInput +=  1.0f;
 
 	float cosPitch = std::cos(pitch);
 	float sinPitch = std::sin(pitch);

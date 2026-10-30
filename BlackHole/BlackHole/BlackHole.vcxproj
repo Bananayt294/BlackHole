@@ -111,7 +111,7 @@
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.363.0\Include;C:\BlackHole-C++\vendor\VulkanMemoryAllocator;C:\BlackHole-C++\vendor\VulkanMemoryAllocator\include;C:\BlackHole-C++\vendor\glm\glm;C:\BlackHole-C++\vendor\SDL3-devel-3.4.18-VC\SDL3-3.4.18\lib;C:\BlackHole-C++\vendor\SDL3-devel-3.4.18-VC\SDL3-3.4.18\lib\x64;C:\BlackHole-C++\vendor\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\BlackHole-C++\vendor\imgui;C:\VulkanSDK\1.4.363.0\Include;C:\BlackHole-C++\vendor\VulkanMemoryAllocator;C:\BlackHole-C++\vendor\VulkanMemoryAllocator\include;C:\BlackHole-C++\vendor\glm\glm;C:\BlackHole-C++\vendor\SDL3-devel-3.4.18-VC\SDL3-3.4.18\lib;C:\BlackHole-C++\vendor\SDL3-devel-3.4.18-VC\SDL3-3.4.18\lib\x64;C:\BlackHole-C++\vendor\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -135,7 +135,7 @@
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp20</LanguageStandard>
-      <AdditionalIncludeDirectories>C:\VulkanSDK\1.4.363.0\Include;C:\BlackHole-C++\vendor\VulkanMemoryAllocator;C:\BlackHole-C++\vendor\VulkanMemoryAllocator\include;C:\BlackHole-C++\vendor\glm\glm;C:\BlackHole-C++\vendor\SDL3-devel-3.4.18-VC\SDL3-3.4.18\lib;C:\BlackHole-C++\vendor\SDL3-devel-3.4.18-VC\SDL3-3.4.18\lib\x64;C:\BlackHole-C++\vendor\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\BlackHole-C++\vendor\imgui;C:\VulkanSDK\1.4.363.0\Include;C:\BlackHole-C++\vendor\VulkanMemoryAllocator;C:\BlackHole-C++\vendor\VulkanMemoryAllocator\include;C:\BlackHole-C++\vendor\glm\glm;C:\BlackHole-C++\vendor\SDL3-devel-3.4.18-VC\SDL3-3.4.18\lib;C:\BlackHole-C++\vendor\SDL3-devel-3.4.18-VC\SDL3-3.4.18\lib\x64;C:\BlackHole-C++\vendor\SDL3-devel-3.4.18-VC\SDL3-3.4.18\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -151,6 +151,12 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\vendor\imgui\backends\imgui_impl_sdl3.cpp" />
+    <ClCompile Include="..\..\vendor\imgui\backends\imgui_impl_vulkan.cpp" />
+    <ClCompile Include="..\..\vendor\imgui\imgui.cpp" />
+    <ClCompile Include="..\..\vendor\imgui\imgui_draw.cpp" />
+    <ClCompile Include="..\..\vendor\imgui\imgui_tables.cpp" />
+    <ClCompile Include="..\..\vendor\imgui\imgui_widgets.cpp" />
     <ClCompile Include="Application.cpp" />
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Camera.h" />

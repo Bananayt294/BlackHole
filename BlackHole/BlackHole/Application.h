@@ -11,6 +11,9 @@
 #include "utils.h"
 #include <array>
 #include "Camera.h"
+#include "imgui.h"
+#include "backends/imgui_impl_sdl3.h"
+#include "backends/imgui_impl_vulkan.h"
 struct SDL_Window;
 struct VmaAllocator_T;
 typedef struct VmaAllocator_T* VmaAllocator;
@@ -29,6 +32,13 @@ struct FrameResources
 
 //default configs
 struct Application {
+
+	float sceneScale = 1.0f;
+	float diskBrightness = 2.5f;
+	float hazeStrength = 1.0f;
+	float diskTiltDegrees = 15.0f;
+
+	bool showControls = true;
 
 	Camera camera;
 	bool mouseCaptured = true;
@@ -84,6 +94,8 @@ struct Application {
 	//Synchronization
 	std::array<FrameResources, MaxFramesInFlight> frameResources;
 	//functions
+	void buildControlUI();
+	bool InitImGui();
 	bool chooseDepthFormat();
 	bool createSyncResources();
 	VkPipeline createGraphicsPipeline();

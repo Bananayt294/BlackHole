@@ -31,15 +31,43 @@ void Application::run()
 
 		previousCounter = currentCounter;
 
-		SDL_Event event{ 0 };
+		SDL_Event event{};
 
 		while (SDL_PollEvent(&event))
 		{
+			// Forward SDL events to Dear ImGui
+			ImGui_ImplSDL3_ProcessEvent(&event);
+
 			if (event.type == SDL_EVENT_QUIT)
 			{
 				running = false;
 				break;
 			}
+
+			// Toggle between UI mode and camera mode
+			else if (event.type == SDL_EVENT_KEY_DOWN &&
+				event.key.key == SDLK_TAB &&
+				!event.key.repeat)
+			{
+				bool captureMouse = showControls;
+
+				if (SDL_SetWindowRelativeMouseMode(
+					window,
+					captureMouse))
+				{
+					showControls = !showControls;
+					mouseCaptured = captureMouse;
+				}
+				else
+				{
+					SDL_Log(
+						"Mouse mode error: %s",
+						SDL_GetError()
+					);
+				}
+			}
+
+			// Camera mouse look
 			else if (event.type == SDL_EVENT_MOUSE_MOTION &&
 				mouseCaptured)
 			{
@@ -48,28 +76,18 @@ void Application::run()
 					event.motion.yrel
 				);
 			}
-			else if (event.type == SDL_EVENT_KEY_DOWN &&
-				event.key.key == SDLK_ESCAPE &&
-				!event.key.repeat)
-			{
-				mouseCaptured = !mouseCaptured;
 
-				if (!SDL_SetWindowRelativeMouseMode(
-					window,
-					mouseCaptured))
-				{
-					SDL_Log(
-						"Failed to change mouse mode: %s",
-						SDL_GetError()
-					);
-				}
-			}
+			// Window resizing
 			else if (event.type == SDL_EVENT_WINDOW_RESIZED)
 			{
 				int pixelWidth = 0;
 				int pixelHeight = 0;
 
-				if (SDL_GetWindowSizeInPixels(window, &pixelWidth, &pixelHeight)) {
+				if (SDL_GetWindowSizeInPixels(
+					window,
+					&pixelWidth,
+					&pixelHeight))
+				{
 					width = static_cast<float>(pixelWidth);
 					height = static_cast<float>(pixelHeight);
 
@@ -77,14 +95,22 @@ void Application::run()
 				}
 			}
 		}
+
 		if (running)
 		{
-			camera.update(SDL_GetKeyboardState(nullptr), deltaTime);
+			// Update camera only in camera mode
+			if (mouseCaptured)
+			{
+				camera.update(
+					SDL_GetKeyboardState(nullptr),
+					deltaTime
+				);
+			}
+
 			render();
 		}
 	}
 }
-
 bool Application::initialize() {
 	timelineSemaphore = VK_NULL_HANDLE;
 	swapchain = VK_NULL_HANDLE;
@@ -154,13 +180,18 @@ bool Application::initializeVulkan() {
 	if (pipeline = createGraphicsPipeline(); !pipeline) {
 		std::cerr << "Unable To Initialize Graphics Queue" << std::endl;
 		return false;
-	}
+	}	
 	if (!createSyncResources()) {
 		std::cerr << "Could not Create the sync related Resources" << std::endl;
 		return false;
 	}
 	if (!createCommandBuffers()) {
 		std::cerr << "Could not create a command Buffer" << std::endl;
+		return false;
+	}
+
+	if (!InitImGui()) {
+		std::cerr << "Could not initialize Dear ImGui" << std::endl;
 		return false;
 	}
 
@@ -808,7 +839,7 @@ VkPipeline Application::createGraphicsPipeline() {
 	VkPushConstantRange pushConstantRange{};
 	pushConstantRange.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
 	pushConstantRange.offset = 0;
-	pushConstantRange.size = 48;
+	pushConstantRange.size = 64;
 
 	VkPipelineLayoutCreateInfo pipelineLayoutInfo{
 		.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO,
@@ -1021,6 +1052,31 @@ void Application::render() {
 		running = false;
 		return;
 	}
+
+	if (ImGui::GetCurrentContext() == nullptr)
+	{
+		throw std::runtime_error(
+			"ImGui context has not been created"
+		);
+	}
+
+	if (ImGui::GetIO().BackendRendererUserData == nullptr)
+	{
+		throw std::runtime_error(
+			"ImGui Vulkan backend has not been initialized"
+		);
+	}
+
+	ImGui_ImplVulkan_NewFrame();
+	ImGui_ImplSDL3_NewFrame();
+
+	ImGui::NewFrame();
+
+
+	buildControlUI();
+
+	ImGui::Render();
+
 	VkCommandBufferBeginInfo cmdBeginInfo{
 		.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO,
 		.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT
@@ -1125,9 +1181,10 @@ void Application::render() {
 			float padding{};
 			float cameraPositionYaw[4]{};
 			float cameraPitchFov[4]{};
+			float sceneControls[4]{};
 		};
 
-		static_assert(sizeof(PushConstants) == 48);
+		static_assert(sizeof(PushConstants) == 64);
 
 		const Uint64 currentTime = SDL_GetPerformanceCounter();
 
@@ -1147,6 +1204,12 @@ void Application::render() {
 		pc.cameraPitchFov[0] = camera.pitch;
 		pc.cameraPitchFov[1] = camera.fovDegrees;
 
+		pc.sceneControls[0] = sceneScale;
+		pc.sceneControls[1] = diskBrightness;
+		pc.sceneControls[2] = hazeStrength;
+		pc.sceneControls[3] = diskTiltDegrees;
+
+
 		vkCmdPushConstants(
 			res.commandBuffer,
 			pipelineLayout, // Your VkPipelineLayout
@@ -1156,6 +1219,7 @@ void Application::render() {
 			&pc
 		);
 		vkCmdDraw(res.commandBuffer, 3, 1, 0, 0);
+		ImGui_ImplVulkan_RenderDrawData(ImGui::GetDrawData(),res.commandBuffer);
 	}
 	vkCmdEndRendering(res.commandBuffer);
 
@@ -1246,4 +1310,175 @@ void Application::render() {
 		std::cerr << "Could not present the swapchain image: " << presentResult << std::endl;
 		running = false;
 	}
+}
+
+
+bool Application::InitImGui(){
+		IMGUI_CHECKVERSION();
+
+		ImGui::CreateContext();
+		ImGui::StyleColorsDark();
+
+		ImGuiStyle& style = ImGui::GetStyle();
+		style.WindowRounding = 6.0f;
+		style.FrameRounding = 4.0f;
+		style.GrabRounding = 4.0f;
+
+		if (!ImGui_ImplSDL3_InitForVulkan(window))
+		{
+			throw std::runtime_error(
+				"Failed to initialize ImGui SDL3 backend"
+			);
+			return false;
+		}
+
+		ImGui_ImplVulkan_InitInfo init{};
+
+		init.ApiVersion = VK_API_VERSION_1_4;
+		init.Instance = vulkanInstance;
+		init.PhysicalDevice = physicalDevice;
+		init.Device = device;
+		init.QueueFamily = gfxQueueFamIdx;
+		init.Queue = gfxQueue;
+
+		init.DescriptorPoolSize = 64;
+
+		init.MinImageCount = 2;
+		init.ImageCount =
+			static_cast<uint32_t>(swapchainImages.size());
+
+		init.UseDynamicRendering = true;
+
+		init.PipelineInfoMain.MSAASamples =
+			VK_SAMPLE_COUNT_1_BIT;
+
+		auto& renderingInfo =
+			init.PipelineInfoMain.PipelineRenderingCreateInfo;
+
+		renderingInfo.sType =
+			VK_STRUCTURE_TYPE_PIPELINE_RENDERING_CREATE_INFO;
+
+		renderingInfo.colorAttachmentCount = 1;
+		renderingInfo.pColorAttachmentFormats = &swapchainFormat;
+
+		renderingInfo.depthAttachmentFormat =
+			VK_FORMAT_UNDEFINED;
+
+		renderingInfo.stencilAttachmentFormat =
+			VK_FORMAT_UNDEFINED;
+
+		if (!ImGui_ImplVulkan_Init(&init))
+		{
+			ImGui_ImplSDL3_Shutdown();
+
+			throw std::runtime_error(
+				"Failed to initialize ImGui Vulkan backend"
+			);
+			return false;
+		}
+
+		std::cout << "ImGui initialized successfully!" << std::endl;
+		return true;
+	}
+
+
+
+void Application::buildControlUI()
+{
+	if (!showControls)
+		return;
+
+	ImGui::SetNextWindowSize(
+		ImVec2(320.0f, 0.0f),
+		ImGuiCond_FirstUseEver
+	);
+
+	if (ImGui::Begin("Gargantua Controls"))
+	{
+		ImGuiIO& io = ImGui::GetIO();
+
+		ImGui::Text(
+			"Mouse Position: %.1f, %.1f",
+			io.MousePos.x,
+			io.MousePos.y
+		);
+
+		ImGui::Text(
+			"Left Click: %s",
+			ImGui::IsMouseDown(ImGuiMouseButton_Left)
+			? "PRESSED"
+			: "RELEASED"
+		);
+
+		ImGui::Separator();
+
+		ImGui::Text("BLACK HOLE SIMULATION");
+		ImGui::Separator();
+
+		ImGui::Text("Scene");
+
+		ImGui::SliderFloat(
+			"Scene Scale",
+			&sceneScale,
+			0.5f,
+			2.5f,
+			"%.2fx"
+		);
+
+		ImGui::Spacing();
+		ImGui::Text("Accretion Disk");
+
+		ImGui::SliderFloat(
+			"Brightness",
+			&diskBrightness,
+			0.0f,
+			6.0f,
+			"%.2f"
+		);
+
+		ImGui::SliderFloat(
+			"Disk Tilt",
+			&diskTiltDegrees,
+			0.0f,
+			35.0f,
+			"%.1f deg"
+		);
+
+		ImGui::Spacing();
+		ImGui::Text("Atmosphere");
+
+		ImGui::SliderFloat(
+			"Haze Intensity",
+			&hazeStrength,
+			0.0f,
+			3.0f,
+			"%.2fx"
+		);
+
+		ImGui::Spacing();
+		ImGui::Text("Camera");
+
+		ImGui::SliderFloat(
+			"Field Of View",
+			&camera.fovDegrees,
+			30.0f,
+			90.0f,
+			"%.1f deg"
+		);
+
+		if (ImGui::Button("Reset Settings"))
+		{
+			sceneScale = 1.0f;
+			diskBrightness = 2.5f;
+			hazeStrength = 1.0f;
+			diskTiltDegrees = 15.0f;
+			camera.fovDegrees = 55.0f;
+		}
+
+		ImGui::Separator();
+
+		ImGui::Text("Press TAB to toggle this panel.");
+	}
+
+	ImGui::End();
 }

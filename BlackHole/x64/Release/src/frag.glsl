@@ -9,10 +9,11 @@ layout(push_constant) uniform PushConstants {
     float padding;
     vec4 cameraPositionYaw;
     vec4 cameraPitchFov;
+    vec4 sceneControls;
 } pc;
+
 const float MODEL_SCALE = 1.25;
 
-const float DISK_BRIGHTNESS = 2.5;
 const float BLACK_HOLE_RADIUS = 0.55 * MODEL_SCALE;
 const float DISK_INNER_RADIUS = 0.75 * MODEL_SCALE;
 const float DISK_OUTER_RADIUS = 2.0 * MODEL_SCALE;
@@ -84,7 +85,7 @@ vec3 spaceBackground(vec3 direction)
 
 vec3 toDiskSpace(vec3 p)
 {
-    float tilt = radians(15.0);
+    float tilt = radians(pc.sceneControls.w);
 
     float c = cos(tilt);
     float s = sin(tilt);
@@ -139,8 +140,7 @@ float sampleDiskDensity(vec3 p)
         radius
     );
 
-    float rotation =
-        pc.time * (0.12 + 0.4 / max(radius, 0.2));
+    float rotation = pc.time * (0.12 + 0.4 / max(radius, 0.2));
 
     float c = cos(rotation);
     float s = sin(rotation);
@@ -165,10 +165,7 @@ float sampleDiskDensity(vec3 p)
         smoothstep(0.24, 0.76, turbulence)
     );
 
-    return verticalDensity *
-           innerFade *
-           outerFade *
-           plasmaDensity;
+    return verticalDensity * innerFade * outerFade * plasmaDensity;
 }
 
 float samplePlasmaHaze(vec3 p)
@@ -471,7 +468,7 @@ vec3 traceBlackHole(vec3 origin, vec3 initialDirection)
             vec3 hazeColor = vec3(0.52, 0.39, 0.23);
 
             float hazeSampleOpacity = 1.0 - exp(
-                -hazeDensity * segmentLength * 0.28
+                -hazeDensity * segmentLength * 0.28 * pc.sceneControls.z / max(pc.sceneControls.x, 0.01)
             );
 
             float remainingHaze =
@@ -518,7 +515,7 @@ vec3 traceBlackHole(vec3 origin, vec3 initialDirection)
 
     if (swallowed)
     {
-        return accumulatedDiskLight * DISK_BRIGHTNESS
+        return accumulatedDiskLight * pc.sceneControls.y
              + accumulatedHazeLight;
     }
 
@@ -552,7 +549,7 @@ vec3 traceBlackHole(vec3 origin, vec3 initialDirection)
         background * (1.0 - accumulatedHazeOpacity);
 
     return attenuatedBackground
-         + accumulatedDiskLight * DISK_BRIGHTNESS
+         + accumulatedDiskLight * pc.sceneControls.y
          + accumulatedHazeLight;
 }
 
@@ -592,15 +589,18 @@ void main()
         + right * uv.x * fovScale
         + up * uv.y * fovScale
     );
+    
+    float sceneScale = max(pc.sceneControls.x, 0.01);
+    vec3 traceCameraPosition = cameraPosition / sceneScale;
 
     vec3 color = traceBlackHole(
-        cameraPosition,
+        traceCameraPosition,
         rayDirection
     );
 
-    float cameraRadius = length(cameraPosition);
+    float cameraRadius = length(traceCameraPosition);
 
-    vec3 cameraRadial = normalize(cameraPosition);
+    vec3 cameraRadial = normalize(traceCameraPosition);
 
     float radialComponent = dot(
         rayDirection,

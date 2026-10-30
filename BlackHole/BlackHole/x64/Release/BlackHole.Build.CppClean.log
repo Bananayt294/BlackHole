@@ -5,6 +5,12 @@ c:\blackhole-c++\blackhole\blackhole\x64\release\vc145.pdb
 \\?\c:\blackhole-c++\blackhole\blackhole\x64\release\main.obj
 \\?\c:\blackhole-c++\blackhole\blackhole\x64\release\camera.obj
 \\?\c:\blackhole-c++\blackhole\blackhole\x64\release\application.obj
+\\?\c:\blackhole-c++\blackhole\blackhole\x64\release\imgui_widgets.obj
+\\?\c:\blackhole-c++\blackhole\blackhole\x64\release\imgui_tables.obj
+\\?\c:\blackhole-c++\blackhole\blackhole\x64\release\imgui_draw.obj
+\\?\c:\blackhole-c++\blackhole\blackhole\x64\release\imgui.obj
+\\?\c:\blackhole-c++\blackhole\blackhole\x64\release\imgui_impl_vulkan.obj
+\\?\c:\blackhole-c++\blackhole\blackhole\x64\release\imgui_impl_sdl3.obj
 c:\blackhole-c++\blackhole\blackhole\x64\release\camera.h.ifc
 c:\blackhole-c++\blackhole\blackhole\x64\release\camera.h.ifc.d.json
 \\?\c:\blackhole-c++\blackhole\blackhole\x64\release\camera.h.obj
@@ -16,6 +22,12 @@ c:\blackhole-c++\blackhole\blackhole\x64\release\blackhole.iobj
 c:\blackhole-c++\blackhole\blackhole\x64\release\application.obj
 c:\blackhole-c++\blackhole\blackhole\x64\release\camera.h.obj
 c:\blackhole-c++\blackhole\blackhole\x64\release\camera.obj
+c:\blackhole-c++\blackhole\blackhole\x64\release\imgui.obj
+c:\blackhole-c++\blackhole\blackhole\x64\release\imgui_draw.obj
+c:\blackhole-c++\blackhole\blackhole\x64\release\imgui_impl_sdl3.obj
+c:\blackhole-c++\blackhole\blackhole\x64\release\imgui_impl_vulkan.obj
+c:\blackhole-c++\blackhole\blackhole\x64\release\imgui_tables.obj
+c:\blackhole-c++\blackhole\blackhole\x64\release\imgui_widgets.obj
 c:\blackhole-c++\blackhole\blackhole\x64\release\main.obj
 c:\blackhole-c++\blackhole\blackhole\x64\release\utils.obj
 c:\blackhole-c++\blackhole\blackhole\x64\release\vmaimplementation.obj

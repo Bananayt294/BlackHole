@@ -1,3 +1,9 @@
+C:\BlackHole-C++\vendor\imgui\backends\imgui_impl_sdl3.cpp;C:\BlackHole-C++\BlackHole\BlackHole\x64\Release\imgui_impl_sdl3.obj
+C:\BlackHole-C++\vendor\imgui\backends\imgui_impl_vulkan.cpp;C:\BlackHole-C++\BlackHole\BlackHole\x64\Release\imgui_impl_vulkan.obj
+C:\BlackHole-C++\vendor\imgui\imgui.cpp;C:\BlackHole-C++\BlackHole\BlackHole\x64\Release\imgui.obj
+C:\BlackHole-C++\vendor\imgui\imgui_draw.cpp;C:\BlackHole-C++\BlackHole\BlackHole\x64\Release\imgui_draw.obj
+C:\BlackHole-C++\vendor\imgui\imgui_tables.cpp;C:\BlackHole-C++\BlackHole\BlackHole\x64\Release\imgui_tables.obj
+C:\BlackHole-C++\vendor\imgui\imgui_widgets.cpp;C:\BlackHole-C++\BlackHole\BlackHole\x64\Release\imgui_widgets.obj
 C:\BlackHole-C++\BlackHole\BlackHole\Application.cpp;C:\BlackHole-C++\BlackHole\BlackHole\x64\Release\Application.obj
 C:\BlackHole-C++\BlackHole\BlackHole\Camera.cpp;C:\BlackHole-C++\BlackHole\BlackHole\x64\Release\Camera.obj
 C:\BlackHole-C++\BlackHole\BlackHole\Camera.h;C:\BlackHole-C++\BlackHole\BlackHole\x64\Release\Camera.h.obj
