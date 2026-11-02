@@ -1,9 +1,22 @@
 ﻿  Scanning sources for module dependencies...
+  Camera.h
+  Compiling...
+  Camera.h
+  imgui_impl_sdl3.cpp
+  imgui_impl_vulkan.cpp
+  imgui.cpp
+  imgui_draw.cpp
+  imgui_tables.cpp
+  imgui_widgets.cpp
   Application.cpp
+  Camera.cpp
+  main.cpp
+  utils.cpp
+  VmaImplementation.cpp
+  VolkImplementation.cpp
   Generating code
-  1 of 3671 functions (<0.1%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    61 functions had inline decision re-evaluated but remain unchanged
+  Previous IPDB not found, fall back to full compilation.
+  All 3671 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   Finished generating code
   BlackHole.vcxproj -> C:\BlackHole-C++\BlackHole\x64\Release\BlackHole.exe
   C:\BlackHole-C++\BlackHole\BlackHole\src\bloom_extract.frag
