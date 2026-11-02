@@ -1,5 +1,7 @@
 ﻿# Black Hole Simulation
 
+<img src="./images/Hole.png" alt="Black Hole Simulation" width="600"/>
+
 A real-time black hole visualization built with C++ and Vulkan, focused on rendering an accretion disk, gravitational light bending, and the black hole's event horizon.
 
 ## Features
