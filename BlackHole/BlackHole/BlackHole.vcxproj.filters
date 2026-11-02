@@ -70,5 +70,14 @@
     <None Include="src\vert.glsl">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="src\bloom_extract.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="composite.frag">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="src\blur.frag">
+      <Filter>Source Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

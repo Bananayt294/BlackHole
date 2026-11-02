@@ -7,7 +7,7 @@
 #include "vk_mem_alloc.h"
 #include <shaderc/shaderc.hpp>
 #include <fstream>
-#include <sstream>
+#include <sstream>	
 #include "utils.h"
 #include <array>
 #include "Camera.h"
@@ -27,6 +27,20 @@ struct FrameResources
 	VkImage depthImage = VK_NULL_HANDLE;
 	VkImageView depthImageView = VK_NULL_HANDLE;
 	VmaAllocation depthImageAllocation = nullptr;
+	VkImage sceneHDRImage = VK_NULL_HANDLE;
+	VmaAllocation sceneHDRAllocation = nullptr;
+	VkImageView sceneHDRImageView = VK_NULL_HANDLE;
+
+	VkImage bloomAImage = VK_NULL_HANDLE;
+	VmaAllocation bloomAAllocation = nullptr;
+	VkImageView bloomAImageView = VK_NULL_HANDLE;
+
+	VkImage bloomBImage = VK_NULL_HANDLE;
+	VmaAllocation bloomBAllocation = nullptr;
+	VkImageView bloomBImageView = VK_NULL_HANDLE;
+
+	VkDescriptorSet bloomExtractDescriptorSet = VK_NULL_HANDLE;
+	VkDescriptorSet compositeDescriptorSet = VK_NULL_HANDLE;
 };
 
 
@@ -72,9 +86,11 @@ struct Application {
 	VkSemaphore timelineSemaphore = VK_NULL_HANDLE;
 	VkPipelineLayout pipelineLayout = nullptr;
 	VkPipeline pipeline = nullptr;
+	VkPipeline hdrScenePipeline = VK_NULL_HANDLE;
 	//Shaders
 	VkShaderModule vertShader{};
 	VkShaderModule fragShader{};
+	VkShaderModule bloomExtractFrag{};
 	//Command
 	bool createCommandBuffers();
 	//image
@@ -93,12 +109,40 @@ struct Application {
 	bool requireSwapchainRecreate = false;
 	//Synchronization
 	std::array<FrameResources, MaxFramesInFlight> frameResources;
+	//bloom
+	VkFormat bloomFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+	VkShaderModule blurFrag = VK_NULL_HANDLE;
+	VkShaderModule compositeFrag = VK_NULL_HANDLE;
+	uint32_t bloomWidth = std::max(1u, swapchainWidth / 4);
+	uint32_t bloomHeight = std::max(1u, swapchainHeight / 4);
+	VkDescriptorSetLayout bloomExtractSetLayout = VK_NULL_HANDLE;
+	VkDescriptorPool bloomDescriptorPool = VK_NULL_HANDLE;
+	VkSampler postProcessSampler = VK_NULL_HANDLE;
+	VkPipelineLayout bloomExtractPipelineLayout = VK_NULL_HANDLE;
+	VkDescriptorSetLayout compositeDescriptorSetLayout = VK_NULL_HANDLE;
+	VkDescriptorPool compositeDescriptorPool = VK_NULL_HANDLE;
+	VkPipelineLayout compositePipelineLayout = VK_NULL_HANDLE;
+	VkPipeline compositePipeline = VK_NULL_HANDLE;
+	VkPipeline bloomExtractPipeline = VK_NULL_HANDLE;
+	VkPipeline blurPipeline = VK_NULL_HANDLE;
+	VkPipelineLayout blurPipelineLayout = VK_NULL_HANDLE;
+	bool createBlurPipeline(VkShaderModule vertexShader,VkShaderModule fragmentShader,VkFormat bloomFormat);
+	bool createBloomExtractPipeline(VkShaderModule vertexShader,VkShaderModule fragmentShader,VkFormat bloomFormat);
+	bool createCompositePipeline(VkShaderModule vertexShader,VkShaderModule fragmentShader,VkFormat colorFormat);
+	bool createCompositeDescriptorResources();
+	bool createBloomDescriptorResources();
+	void destroyBloomDescriptorResources();
+	void destroyBloomResources();
+	VkFormat HDR_FORMAT = VK_FORMAT_R16G16B16A16_SFLOAT;
 	//functions
+	bool createColorTarget(uint32_t targetWidth,uint32_t targetHeight,VkImage& image,VmaAllocation& allocation,VkImageView&);
+	void destroyColorTarget(VkImage& image,VmaAllocation& allocation,VkImageView& imageView);
+	bool SelectHDR();
 	void buildControlUI();
 	bool InitImGui();
 	bool chooseDepthFormat();
 	bool createSyncResources();
-	VkPipeline createGraphicsPipeline();
+	VkPipeline createGraphicsPipeline(VkFormat colorFormat);
 	bool createShaders();
 	VkShaderModule createShaderModule(const std::string& filename, shaderc_shader_kind kind) const;
 	void destroySwapchain();
@@ -116,7 +160,10 @@ struct Application {
 	void shutdown();
 };
 
+struct BlurPushConstants
+{
+	float direction[2];
+	float texelSize[2];
+};
 
-
-
-
+static_assert(sizeof(BlurPushConstants) == 16);

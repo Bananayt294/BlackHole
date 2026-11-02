@@ -632,9 +632,6 @@ void main()
     color += vec3(1.0, 0.78, 0.52) * photonRing * 0.65;
 
     color = max(color, vec3(0.0));
-    color = color / (color + vec3(0.65));
-
-    color = pow(color, vec3(1.0 / 2.2));
 
     outColor = vec4(color, 1.0);
 }

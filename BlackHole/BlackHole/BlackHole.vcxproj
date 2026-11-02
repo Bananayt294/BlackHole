@@ -170,6 +170,9 @@
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="composite.frag" />
+    <None Include="src\bloom_extract.frag" />
+    <None Include="src\blur.frag" />
     <None Include="src\frag.glsl" />
     <None Include="src\vert.glsl" />
   </ItemGroup>
