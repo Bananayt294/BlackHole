@@ -1,6 +1,6 @@
 ﻿# Black Hole Simulation
 
-<img src="./images/Hole-Good.png" alt="Black Hole Simulation" width="600"/>
+<img src="./images/Hole-Good.png" alt="Black Hole Simulation" width="600"/> <img src="./images/image.png" alt="Black Hole Simulation" width="600"/>
 <img src="./images/Hole.png" alt="Black Hole Simulation" width="600"/>
 
 # Black Hole Simulation — C++ & Vulkan
